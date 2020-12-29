@@ -1,0 +1,27 @@
+   A          R RECORD1                   CF03(03 'Exit')
+   A                                      CF21(21 'QUSCMDLN')
+   A                                  2  4'Nahal Esmaeili'     			A                                  2 39'Lab 4'
+	A                                  2 71DATE EDTCDE(Y)
+    A                                  3 71TIME
+-
+    A                                       options:'
+    A                                  8 15'1. Currency Symbol Used by this Sy-
+    A                                      stem'
+    A                                  9 15'2. IPL type (Initial Program Load -
+    A                                      for System Reboot)'
+    A                                 10 15'3. Signed on User''s Message Queue'
+    A                                 11 15'4. Initial number of active jobs f-
+    A                                      or storage allocation'
+    A                                 12 15'5. Display System Serial Number'
+   A                                 13 15'6. Maximum Password Length'
+   A                                 14 15'7. Previous sign on by signed on u-
+   A                                      ser'
+    A                                 16 17'Option:'
+    A            OPTION         2   B 16 25
+    A  30                                  DSPATR(RI)
+    A  30                                  DSPATR(PC)
+    A  30                             16 29'A valid option must be entered'
+    A                                      COLOR(RED)
+    A            MSGTXT        70   O 18  6
+    A                                 20  4'F3=Exit'
+    A                                 20 24'F21=Command Line'

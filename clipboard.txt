@@ -1,0 +1,138 @@
+https://github.com/nahales/BCI433-IBMi_Business_Computing/blob/master/LAB4.FILE/LAB4DF.DS
+https://github.com/hyunjiLeeTech/BCI433
+https://github.com/hirocsingh/BCI433
+
+
+
+
+
+     A          R RECORD1
+     A                                      CA03(03 'EXIT')
+     A                                      CF21(21 'QUSCMDLN')
+     A                                  1 38'Lab 4'
+     A                                  5  3'Please select one of the following-
+     A                                       options:'
+     A                                  8 14'2.  Maximum Invalid Signon Attempt-
+     A                                      s allowed'
+     A                                  7 14'1.  Run Instructor''s Tickets Prog-
+     A                                      ram'
+     A                                  9 14'3.  Signed on User''s Message Queu-
+     A                                      e'
+     A                                 15 17'Option:'
+     A                                 23  4'F3=Exit'
+     A                                 23 17'F21=Comand Line '
+     A                                  1  3'VU PHAM'
+     A                                 10 14'4.  Initial number of active jobs -
+     A                                      for storage allocation'
+     A                                 11 14'5.  Previous sign on by signed on -
+     A                                      user'
+     A            OPTION         2A  B 15 25VALUES('1' '2' '3' '4' '5' '01' +
+     A                                      '02' '03' '04' '05' '06')
+     A  30                                  DSPATR(RI)
+     A  30                                  DSPATR(PC)
+     A            MSGTXT1       70   O 17  6
+     A            MSGTXT2       70   O 18  6
+     A            INVALID       31   O 15 29
+     A                                  2 68TIME
+     A                                  1 69DATE  
+
+             PGM
+             DCLF       LAB4DSP
+             DCL        &MSGQ *CHAR 10
+             DCL        &MSGQLIB *CHAR 10
+             DCL        &QACTJOB *DEC 5
+             DCL        &QACTJOBCH *CHAR 5
+             DCL        &DATE *CHAR 8
+             DCL        &TIME *CHAR 8
+             DCL        &PVSN *CHAR 13
+             dcl        &MAX *CHAR 6
+             dcl        &INVALID *CHAR 30
+             dcl        &in30 *CHAR 1
+
+
+             SndRcvf
+             DoWhile    (&in03 = '0')
+
+                CallSubr   INITIALIZE
+                Select
+                   When       (&Option = '1' *or &option = '01') CallSubr OPTION1
+                   When       (&Option = '2' *or &option = '02') CallSubr OPTION2
+                   When       (&Option = '3' *or &option = '03') CallSubr OPTION3
+                   When       (&Option = '4' *or &option = '04') CallSubr OPTION4
+                   When       (&Option = '5' *or &option = '05') CallSubr OPTION5
+                   Otherwise  CallSubr INVALID
+                EndSelect
+                Select
+                   WHEN       (&in21 = '1') CALL QUSCMDLN
+                EndSelect
+                SndRcvf
+             Enddo
+
+             SUBR       INITIALIZE
+                ChgVar     &In30 '0'
+                ChgVar     &MSGTxt1 ' '
+                ChgVar     &MsgTxt2 ' '
+             ENDSUBR
+
+
+             SUBR       INVALID
+                CHGVAR     &INVALID 'Valid option must be entered'
+                CHGVAR     &in30 '1'
+                CHGVAR     &MSGTXT1 ' '
+                CHGVAR     &MSGTXT2 ' '
+             EndSubr
+
+             SUBR       OPTION1
+                DSPLIBL
+                CALL       BCI433LIB/TICKETRPG2
+                DSPLIBL
+                CHGVAR     &MSGTXT1 ('The Instructior Version of the Ticket RPGLE program was +
+                             run')
+                CHGVAR     &MSGTXT2 ('CLLE Programs can manage how an RPGLE Business +
+                             Application is run')
+             EndSubr
+             SUBR       OPTION2
+                RTVSYSVAL  SYSVAL(QMAXSIGN) RTNVAR(&MAX)
+                CHGVAR     &MSGTXT1 ('Maximum invalid signons attempts allowed:' *Bcat &MAX +
+                             *Bcat '(tries)')
+                CHGVAR     &MSGTXT2 ('CLLE Programs can report on the system and manage system +
+                             wide settings')
+                CHGVAR     &INVALID ' '
+
+             EndSubr
+             SUBR       OPTION3
+                RTVUSRPRF  MSGQ(&MSGQ) MSGQLIB(&MSGQLIB)
+                CHGVAR     &MSGTXT1 ('Signed on User''s message queue is' *BCAT &MSGQLIB *TCAT +
+                             '/' *CAT &MSGQ)
+                CHGVAR     &MSGTXT2 ('CLLE Programs can report on and manage the users on the +
+                             system')
+                CHGVAR     &INVALID ' '
+
+             EndSubr
+             SUBR       OPTION4
+                RTVSYSVAL  SYSVAL(QACTJOB) RTNVAR(&QACTJOB)
+                CHGVAR     &QACTJOBCH &QACTJOB
+                CHGVAR     &MSGTXT1 ('Initial number of active jobs for which storage is +
+                             allocated is: ' *BCAT &QACTJOBCH)
+                CHGVAR     &MSGTXT2 ('CLLE Programs can report on the system and manage system +
+                             wide settings')
+                CHGVAR     &INVALID ' '
+             EndSubr
+             SUBR       OPTION5
+                RTVUSRPRF  PRVSIGN(&PVSN) USRPRF(*CURRENT)
+                RTVUSRPRF  RTNUSRPRF(&MSGQ) USRPRF(*CURRENT)
+                CHGVAR     &DATE (%SST(&PVSN 4 2) *CAT '/' *CAT %SST(&PVSN 6 2) *CAT '/' *CAT +
+                             %SST(&PVSN 2 2))
+                CHGVAR     &TIME (%SST(&PVSN 8 2) *CAT ':' *CAT %SST(&PVSN 10 2) *CAT ':' *CAT +
+                             %SST(&PVSN 12 2))
+                CHGVAR     &MSGTXT1 ('Previous sign on by signed on user ' *BCAT &MSGQ *BCAT +
+                             'was on ' *CAT &DATE *BCAT &TIME)
+                CHGVAR     &MSGTXT2 ('CLLE Programs can report on and manage the users on the +
+                             system')
+                CHGVAR     &INVALID ' '
+             EndSubr
+
+
+
+
+             ENDPGM 
